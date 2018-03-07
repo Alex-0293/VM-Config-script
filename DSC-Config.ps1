@@ -1,0 +1,7 @@
+Configuration PKILabConfig 
+{
+    Node Oslo
+    {
+        
+    }
+}

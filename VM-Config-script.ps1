@@ -64,7 +64,7 @@ function ConfigKeyboard ()
         Set-ItemProperty -path "HKCU:\Keyboard Layout\Preload" -name "2" -value "00000419"
         Set-ItemProperty -path "HKCU:\Keyboard Layout\Toggle"  -name "Language Hotkey" -value "2"} | out-null
 }
-function CreateSchTask ([string]$UserName,$Password,$DataDST)
+function CreateSchTask ([string]$UserName,$Pass,$DataDST)
 {
     write-host "6.Создадим задачу BGinfo"
     $ScriptPath = "$DataDST\BG-Task.ps1"
@@ -109,19 +109,18 @@ function SetVMConfig ()
     $Global:WS += $PARIS
 }
 ##############################################################################
-#Общие настройки сети для ВМ
-$NetMask = "255.255.255.0"
-$NetGW = "192.168.0.254"
-$NetDNS = "192.168.0.254"
-#Учетные записи по умолчанию
-$UserName = "администратор"
-$Password = "123456*ф"
-$SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
-#Пути к данным
-$DataSRC = "c:\data\bg"
-$DataDST = "c:\data\bg"
-$Global:WS = @()
-
+    #Общие настройки сети для ВМ
+        $NetMask = "255.255.255.0"
+        $NetGW = "192.168.0.254"
+        $NetDNS = "192.168.0.254"
+    #Учетные записи по умолчанию
+        $UserName = "администратор"
+        $Pass = "123456*ф"
+        $SecurePassword = $Pass | ConvertTo-SecureString -AsPlainText -Force
+    #Пути к данным
+        $DataSRC = "c:\data\bg"
+        $DataDST = "c:\data\bg"
+        $Global:WS = @()
 ##############################################################################
 Clear-Host
 
@@ -160,10 +159,10 @@ foreach ($VM in $IpList) {
     $Global:PSSession1 = New-PSSession -VMId $VM.VmId  -Credential $Credentials
 
     CopyData      $DataDST $DataSRC
-    RenameComp   ($Password| ConvertTo-SecureString -AsPlainText -force) $UserName $NewName $Descr
+    RenameComp   ($Pass| ConvertTo-SecureString -AsPlainText -force) $UserName $NewName $Descr
     SetIp         $NewIp $NetMask $NetGW $NetDNS
     EnableRDPAcc 
     ConfigKeyboard
-    CreateSchTask $UserName $Password $DataDST
+    CreateSchTask $UserName $Pass $DataDST
     RebootComp
 }

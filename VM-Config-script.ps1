@@ -1,13 +1,19 @@
-﻿# Name:      Настройка виртуальных машин
+﻿# Name:      EN:Virtual mashine configuration RU:Настройка виртуальных машин
 # Ver:       1.0
 # Date:      04.03.2018
 # Platform:  Windows server 2016
 # PSVer:     5.1.14393.1944
 # Author:    AlexK
 
-# Настроим пармаетры в SetVMConfig()
+# EN
+# Setup parameters in SetVMConfig()
+# Looking for the VM which name contains host name from parameters
+# Setup VM with parameters
+
+# RU
+# Настроим параметры в SetVMConfig()
 # Среди запущеных виртуальных машин, ищем те у которых в названии, есть название узла.
-# Конфигурируем в соответствии с настройками .
+# Конфигурируем в соответствии с настройками 
 ##############################################################################
 function CopyData ([string]$DataDST,$DataSRC)
 {
@@ -22,6 +28,7 @@ function CopyData ([string]$DataDST,$DataSRC)
 function RenameComp ([SecureString]$SecurePassword,$UserName,$NewName,$Descr)
 {
     write-host "2.Переименуем удаленный компьютер"
+    write-host "2.Rename remote computer"
     Invoke-Command -Session $Global:PSSession1  -ScriptBlock {`
         $User = "$env:computername\$Using:UserName" 
         $Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $User,  $using:SecurePassword 
@@ -34,7 +41,7 @@ function RenameComp ([SecureString]$SecurePassword,$UserName,$NewName,$Descr)
 function SetIp ([string]$NewIp,$NetMask,$NetGW,$NetDNS)
 {
     write-host "3.Изменим сетевые настройки включеного адаптера"
-
+    write-host "3.Change NIC settings"
     Invoke-Command -Session $Global:PSSession1  -ScriptBlock {`
             $NICs = Get-WMIObject Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $true}
         Foreach ($NIC in $NICs) {`

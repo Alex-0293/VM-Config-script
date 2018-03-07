@@ -27,8 +27,7 @@ function CopyData ([string]$DataDST,$DataSRC)
 }
 function RenameComp ([SecureString]$SecurePassword,$UserName,$NewName,$Descr)
 {
-    write-host "2.Переименуем удаленный компьютер"
-    write-host "2.Rename remote computer"
+    write-host @{"en-US"="2.Rename remote computer";"ru-Ru"="2.Переименуем удаленный компьютер"}[$CurLang]
     Invoke-Command -Session $Global:PSSession1  -ScriptBlock {`
         $User = "$env:computername\$Using:UserName" 
         $Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $User,  $using:SecurePassword 
@@ -40,8 +39,7 @@ function RenameComp ([SecureString]$SecurePassword,$UserName,$NewName,$Descr)
 }
 function SetIp ([string]$NewIp,$NetMask,$NetGW,$NetDNS)
 {
-    write-host "3.Изменим сетевые настройки включеного адаптера"
-    write-host "3.Change NIC settings"
+    write-host @{"en-US"="3.Change NIC settings";"ru-Ru"="3.Изменим сетевые настройки включеного адаптера"}[$CurLang]
     Invoke-Command -Session $Global:PSSession1  -ScriptBlock {`
             $NICs = Get-WMIObject Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $true}
         Foreach ($NIC in $NICs) {`
@@ -54,7 +52,7 @@ function SetIp ([string]$NewIp,$NetMask,$NetGW,$NetDNS)
 }
 function EnableRDPAcc ()
 {
-    write-host "4.Откроем доступ по RDP"
+    write-host @{"en-US"="4.Open RDP Access";"ru-Ru"="4.Откроем доступ по RDP"}[$CurLang]
     Invoke-Command -Session $Global:PSSession1  -ScriptBlock {`
         $ts = get-WMIObject Win32_TerminalServiceSetting -Namespace ROOT\CIMV2\TerminalServices
         $ts.SetAllowTSConnections(1)
@@ -65,22 +63,24 @@ function EnableRDPAcc ()
 }
 function ConfigKeyboard ()
 {
-    write-host "5.Установим раскладку клавиатуры"
+    write-host @{"en-US"="5.Set keyboard layout";"ru-Ru"="5.Установим раскладку клавиатур"}[$CurLang]
     Invoke-Command -Session $Global:PSSession1   -ScriptBlock {`
-        Set-ItemProperty -path "HKCU:\Keyboard Layout\Preload" -name "1" -value "00000409"
-        Set-ItemProperty -path "HKCU:\Keyboard Layout\Preload" -name "2" -value "00000419"
-        Set-ItemProperty -path "HKCU:\Keyboard Layout\Toggle"  -name "Language Hotkey" -value "2"} | out-null
+        Set-ItemProperty -path "HKCU:\Keyboard Layout\Preload" -name "1" -value "00000409" #Eng
+        Set-ItemProperty -path "HKCU:\Keyboard Layout\Preload" -name "2" -value "00000419" #Ru
+        Set-ItemProperty -path "HKCU:\Keyboard Layout\Toggle"  -name "Language Hotkey" -value "2" } | out-null #Ctrl-Shift
 }
 function CreateSchTask ([string]$UserName,$Pass,$DataDST)
 {
-    write-host "6.Создадим задачу BGinfo"
+    write-host ""
+    write-host @{"en-US"="6.Create task BGInfo";"ru-Ru"="6.Создадим задачу BGinfo"}[$CurLang]
     $ScriptPath = "$DataDST\BG-Task.ps1"
     Invoke-Command -Session $Global:PSSession1 -ScriptBlock {powershell.exe `
-        -file $Using:ScriptPath $env:computername $Using:UserName $Using:Password $Using:DataDST}| out-null
+        -file $Using:ScriptPath $env:computername $Using:UserName $Using:Pass $Using:DataDST}| out-null
 }
 function RebootComp ()
 {
-    write-host "7.Перезагрузим компьютер"
+    write-host @{"en-US"="7.Restart remote VM";"ru-Ru"="7.Перезагрузим компьютер"}[$CurLang]
+    write-host 
     Invoke-Command -Session $Global:PSSession1  -ScriptBlock {Restart-Computer -Force}
 }
 function SetVMConfig ()
@@ -116,14 +116,20 @@ function SetVMConfig ()
     $Global:WS += $PARIS
 }
 ##############################################################################
+    #Language settings
+    #Выбор языка 
+        $CurLang = "ru-Ru" #=$psu1culture
+    #Common network settings
     #Общие настройки сети для ВМ
         $NetMask = "255.255.255.0"
         $NetGW = "192.168.0.254"
         $NetDNS = "192.168.0.254"
+    #Default accounts
     #Учетные записи по умолчанию
         $UserName = "администратор"
         $Pass = "123456*ф"
         $SecurePassword = $Pass | ConvertTo-SecureString -AsPlainText -Force
+    #Data paths
     #Пути к данным
         $DataSRC = "c:\data\bg"
         $DataDST = "c:\data\bg"
